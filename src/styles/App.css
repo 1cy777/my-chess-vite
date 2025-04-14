@@ -1,0 +1,178 @@
+/* 🔁 Скидання margin/padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 🌐 Обгортка додатку */
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ♟️ Шахова дошка */
+.board {
+  width: calc(64px * 8);
+  height: calc(64px * 8);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* 📦 Клітинка */
+.cell {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.15);
+  background-size: cover;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* 🎨 Кольори клітинок */
+.cell.white {
+  background-color: #c1c1c1;
+}
+.cell.black {
+  background-color: #5f5f5f;
+}
+
+/* ✅ Виділена клітинка */
+.selected {
+  background-color: green !important; /* !important на випадок конфлікту */
+}
+
+/* ✅ Доступна клітинка (без фігури) */
+.available {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background-color: #22c022;
+}
+
+/* 🧩 Втрачені фігури */
+.lost {
+  height: calc(50vh - 60px);
+  padding: 30px;
+  margin-left: 50px;
+  background-color: lightgray;
+}
+
+/* ✅ Підсвітка шаху */
+.in-check {
+  background-color: rgb(255, 127, 8) !important; /* 🆕 додаємо !important */
+}
+
+/* ✅ Підсвітка мата */
+.checkmate {
+  background-color: rgb(255, 0, 0) !important; /* 🆕 додаємо !important */
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 20px 4px rgba(255, 0, 0, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 35px 8px rgba(255, 0, 0, 1);
+  }
+  100% {
+    box-shadow: 0 0 20px 4px rgba(255, 0, 0, 0.8);
+  }
+}
+
+/* ♟️ Нумерація дошки */
+.board-wrapper {
+  display: inline-block;
+  position: relative;
+}
+
+.board-row {
+  display: flex;
+  align-items: center;
+}
+
+.row-label {
+  width: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  margin-right: 4px;
+  color: #333;
+}
+
+.column-labels {
+  display: flex;
+  margin-left: 24px;
+}
+
+.column-label {
+  width: 64px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+/* ♟️ Фігура */
+.figure {
+  width: 48px;
+  height: 48px;
+  position: relative;
+}
+
+/* 🪄 Модалка просування пішака */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.promotion-options {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.promotion-img {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.promotion-img:hover {
+  transform: scale(1.2);
+}
+
+.game-over-banner {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 30px 50px;
+  border: 2px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  text-align: center;
+}
