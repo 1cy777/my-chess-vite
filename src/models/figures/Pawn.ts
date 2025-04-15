@@ -1,14 +1,15 @@
+/// <reference types="vite-plugin-svgr/client" />
 import { Figure, FigureNames } from '@/models/figures/Figure';
 import { Colors } from '@/models/Colors';
 import { Cell } from '@/models/board/Cell';
-import blackLogo from "@/assets/chess-icons/black-pawn.svg";
 import whiteLogo from "@/assets/chess-icons/white-pawn.svg";
+import blackLogo from "@/assets/chess-icons/black-pawn.svg";
 
 export class Pawn extends Figure {
 
   constructor(color: Colors, cell: Cell) {
     super(color, cell);
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
+    this.logo = color === Colors.WHITE ? whiteLogo : blackLogo;
     this.name = FigureNames.PAWN;
   }
 
@@ -101,4 +102,5 @@ export class Pawn extends Figure {
     super.moveFigure(target, onPawnPromote);
     this.isFirstStep = false;
   }
+  
 }

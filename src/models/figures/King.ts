@@ -1,15 +1,16 @@
+/// <reference types="vite-plugin-svgr/client" />
 import { Figure, FigureNames } from '@/models/figures/Figure';
 import { Colors } from '@/models/Colors';
 import { Cell } from '@/models/board/Cell';
-import blackLogo from "@/assets/chess-icons/black-king.svg";
 import whiteLogo from "@/assets/chess-icons/white-king.svg";
+import blackLogo from "@/assets/chess-icons/black-king.svg";
 
 export class King extends Figure {
   isFirstStep: boolean = true;
 
   constructor(color: Colors, cell: Cell) {
     super(color, cell);
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
+    this.logo = color === Colors.WHITE ? whiteLogo : blackLogo;
     this.name = FigureNames.KING;
   }
 
@@ -91,4 +92,5 @@ export class King extends Figure {
     }
     return false;
   }
+  
 }

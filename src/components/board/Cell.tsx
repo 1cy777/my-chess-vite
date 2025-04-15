@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
+import React, { FC } from "react";
 import { Cell } from "@/models/board/Cell";
+import "@/styles/App.css";
 
 interface CellProps {
   cell: Cell;
@@ -8,20 +9,35 @@ interface CellProps {
 }
 
 const CellComponent: FC<CellProps> = ({ cell, selected, click }) => {
+  const getClassNames = (): string => {
+    return [
+      "cell",
+      cell.color,
+      selected && "selected",
+      cell.isCheckmate && "checkmate",
+      !cell.isCheckmate && cell.isKingInCheck && "in-check"
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  const getBackgroundStyle = (): React.CSSProperties => {
+    if (cell.available && cell.figure) {
+      return { background: "green" };
+    }
+    return {};
+  };
+
   return (
-    <div
-      className={[
-        'cell',
-        cell.color,
-        selected ? "selected" : '',
-        cell.isCheckmate ? "checkmate" : (cell.isKingInCheck ? "in-check" : '')
-      ].join(' ')}
-      onClick={() => click(cell)}
-      style={{ background: cell.available && cell.figure ? 'green' : '' }}
-    >
+    <div className={getClassNames()} onClick={() => click(cell)} style={getBackgroundStyle()}>
       {cell.available && !cell.figure && <div className="available" />}
-      {cell.figure?.logo && (<img src={cell.figure.logo} alt=""
-      style={{ width: '90%', height: '90%', objectFit: 'contain' }}/>)}
+      {cell.figure?.logo && (
+        <img
+          src={cell.figure.logo}
+          alt=""
+          className="figure-image"
+        />
+      )}
     </div>
   );
 };

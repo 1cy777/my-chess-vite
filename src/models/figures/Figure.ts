@@ -44,5 +44,19 @@ export class Figure {
     return this.canMove(target);
   }
 
+  getFigureNotation(): string {
+    switch (this.name) {
+      case "King": return "K";
+      case "Queen": return "Q";
+      case "Rook": return "R";
+      case "Bishop": return "B";
+      case "Knight": return "N";
+      case "Pawn": return "P";
+      default: return "?";
+    }
+  }
+  
   moveFigure(target: Cell, onPawnPromote?: (cell: Cell) => void): void { }
 }
+
+

@@ -1,5 +1,6 @@
 // components/GameOverModal.tsx
 import React, { FC } from "react";
+import "@/styles/App.css";
 
 interface GameOverModalProps {
   message: string;
@@ -9,7 +10,7 @@ interface GameOverModalProps {
 const GameOverModal: FC<GameOverModalProps> = ({ message, onRestart }) => {
   return (
     <div className="modal-overlay">
-      <div className="modal">
+      <div className="game-over-banner">
         <h2>{message}</h2>
         <button onClick={onRestart}>🔁 Почати нову гру</button>
       </div>

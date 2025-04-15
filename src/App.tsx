@@ -26,7 +26,6 @@ function App() {
   const [gameOverMessage, setGameOverMessage] = useState<string | null>(null);
 
 
-
   useEffect(() => {
     restart()
     setCurrentPlayer(whitePlayer);
@@ -36,8 +35,13 @@ function App() {
     const newBoard = new Board();
     newBoard.initCells();
     newBoard.addFigures();
+  
     setBoard(newBoard);
-    setCurrentPlayer(whitePlayer); // 👈 Повертаємо хід білому при рестарті
+    setFenHistory([]); // ✅ очищаємо історію FEN
+    setIsGameOver(false); // на всяк випадок
+    setGameOverMessage(null);
+    setPromotionCell(null);
+    setCurrentPlayer(whitePlayer); // 👈 Хід білого
   }
 
   function swapPlayer() {
@@ -70,7 +74,6 @@ function App() {
     setBoard(board.getCopyBoard()); // оновлення дошки
   };
 
-
   return (
     <div className="app">
       <Timer
@@ -97,9 +100,9 @@ function App() {
           onSelect={handlePromotionSelect}
         />
       )}
-      {isGameOver && gameOverMessage && (
+      {isGameOver && (
         <GameOverModal
-          message={gameOverMessage}
+          message={gameOverMessage || "Гру завершено"}
           onRestart={() => {
             restart();
             setIsGameOver(false);

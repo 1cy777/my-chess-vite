@@ -1,7 +1,7 @@
-// components/PromotionModal.tsx
 import React from 'react';
 import { FigureNames } from "@/models/figures/Figure";
 import { Colors } from "@/models/Colors";
+
 import whiteQueen from "@/assets/chess-icons/white-queen.svg";
 import whiteKnight from "@/assets/chess-icons/white-knight.svg";
 import whiteRook from "@/assets/chess-icons/white-rook.svg";
@@ -18,11 +18,12 @@ interface PromotionModalProps {
 
 const PromotionModal: React.FC<PromotionModalProps> = ({ color, onSelect }) => {
   const isWhite = color === Colors.WHITE;
+
   const figures = [
     { name: FigureNames.QUEEN, img: isWhite ? whiteQueen : blackQueen },
     { name: FigureNames.ROOK, img: isWhite ? whiteRook : blackRook },
     { name: FigureNames.BISHOP, img: isWhite ? whiteBishop : blackBishop },
-    { name: FigureNames.KNIGHT, img: isWhite ? whiteKnight : blackKnight }
+    { name: FigureNames.KNIGHT, img: isWhite ? whiteKnight : blackKnight },
   ];
 
   return (

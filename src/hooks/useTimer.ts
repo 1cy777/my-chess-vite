@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Player } from '@/models/Player';
 import { Colors } from '@/models/Colors';
 
-const INITIAL_TIME = 300; // 5 хвилин
+const INITIAL_TIME = 5; // 5 хвилин
 
 export default function useTimer(currentPlayer: Player | null, isGameOver: boolean) {
   const [blackTime, setBlackTime] = useState(INITIAL_TIME);

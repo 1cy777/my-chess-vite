@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from "react";
 import { Board } from "@/models/board/Board";
-import CellComponent from "@/components/board/Cell";
 import { Cell } from "@/models/board/Cell";
 import { Player } from "@/models/Player";
 import { useGameLogic } from "@/hooks/useGameLogic";
+import BoardHeader from "@/components/board/BoardHeader";
+import BoardGrid from "@/components/board/BoardGrid";
 
 interface BoardProps {
   board: Board;
@@ -54,50 +55,18 @@ const BoardComponent: FC<BoardProps> = ({
     updateBoard();
   }, [selectedCell]);
 
-  const orderedRows = isFlipped ? [...board.cells].reverse() : board.cells;
-  const columnLabels = isFlipped
-    ? ["h", "g", "f", "e", "d", "c", "b", "a"]
-    : ["a", "b", "c", "d", "e", "f", "g", "h"];
-
   return (
     <div>
-      <h3>Хід - {currentPlayer?.color}</h3>
-      <button onClick={() => setIsFlipped(!isFlipped)}>
-        🔄 Розвернути дошку
-      </button>
-
-      <div className="board-wrapper">
-        <div className="board">
-          {orderedRows.map((row, rowIndex) => (
-            <div key={rowIndex} className="board-row">
-              <div className="row-label">
-                {isFlipped ? rowIndex + 1 : 8 - rowIndex}
-              </div>
-
-              {(isFlipped ? [...row].reverse() : row).map((cell) => (
-                <CellComponent
-                  key={cell.id}
-                  cell={cell}
-                  selected={
-                    selectedCell?.x === cell.x && selectedCell?.y === cell.y
-                  }
-                  click={(clicked) => clickCell(clicked, isGameOver)}
-                />
-              ))}
-            </div>
-          ))}
-
-          <div className="column-labels">
-            {columnLabels.map((label, i) => (
-              <div key={i} className="column-label">
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <BoardHeader currentPlayer={currentPlayer} isFlipped={isFlipped} toggleFlip={() => setIsFlipped(!isFlipped)} />
+      <BoardGrid
+        cells={board.cells}
+        selectedCell={selectedCell}
+        isFlipped={isFlipped}
+        isGameOver={isGameOver}
+        onCellClick={(clicked) => clickCell(clicked, isGameOver)}
+      />
     </div>
   );
 };
 
-export default BoardComponent; 
+export default BoardComponent;

@@ -12,6 +12,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 /* ♟️ Шахова дошка */
@@ -164,7 +165,7 @@
 }
 
 .game-over-banner {
-  position: absolute;
+  position: fixed;
   top: 20%;
   left: 50%;
   transform: translateX(-50%);
@@ -175,4 +176,10 @@
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   text-align: center;
+}
+
+.figure-image {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
 }

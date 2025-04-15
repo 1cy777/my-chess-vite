@@ -1,14 +1,14 @@
 import { Figure, FigureNames } from '@/models/figures/Figure';
 import { Colors } from '@/models/Colors';
 import { Cell } from '@/models/board/Cell';
-import blackLogo from "@/assets/chess-icons/black-bishop.svg";
 import whiteLogo from "@/assets/chess-icons/white-bishop.svg";
+import blackLogo from "@/assets/chess-icons/black-bishop.svg";
 
 export class Bishop extends Figure {
 
   constructor(color: Colors, cell: Cell) {
     super(color, cell);
-    this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
+    this.logo = color === Colors.WHITE ? whiteLogo : blackLogo;
     this.name = FigureNames.BISHOP;
   }
 
@@ -19,4 +19,5 @@ export class Bishop extends Figure {
       return true
     return false
   }
+  
 }
