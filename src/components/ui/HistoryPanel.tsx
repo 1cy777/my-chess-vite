@@ -1,12 +1,16 @@
 import React from "react";
 import { MoveInfo } from "@/models/MoveInfo";
 import { Colors } from "@/models/Colors";
+import { Figure } from "@/models/figures/Figure";
 
 interface Props {
   history: MoveInfo[];
   onSelect: (index: number) => void;
   activeIndex: number;
+  lostWhiteFigures: Figure[];
+  lostBlackFigures: Figure[];
 }
+
 
 const HistoryPanel: React.FC<Props> = ({ history, onSelect, activeIndex }) => {
   const grouped: {

@@ -3,7 +3,6 @@ import { Board } from "@/models/board/Board";
 import { Cell } from "@/models/board/Cell";
 import { Player } from "@/models/Player";
 import { useGameLogic } from "@/hooks/useGameLogic";
-import BoardHeader from "@/components/board/BoardHeader";
 import BoardGrid from "@/components/board/BoardGrid";
 import { Figure } from "@/models/figures/Figure";
 import { FigureNames } from "@/models/figures/Figure";
@@ -74,11 +73,6 @@ const BoardComponent: FC<BoardProps> = ({
 
   return (
     <div>
-      <BoardHeader
-        currentPlayer={currentPlayer}
-        isFlipped={isFlipped}
-        toggleFlip={() => setIsFlipped(!isFlipped)}
-      />
       <BoardGrid
         cells={board.cells}
         selectedCell={selectedCell}

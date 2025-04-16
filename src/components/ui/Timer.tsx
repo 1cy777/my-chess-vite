@@ -24,9 +24,8 @@ const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart, initialTime
 
   return (
     <div className="timer">
-      <button onClick={handleRestart}>🔁 Перезапустити гру</button>
-      <div>♟️ Чорні: {formatTime(blackTime)}</div>
-      <div>♟️ Білі: {formatTime(whiteTime)}</div>
+      <div> Чорні: {formatTime(blackTime)}</div>
+      <div> Білі: {formatTime(whiteTime)}</div>
     </div>
   );
 };

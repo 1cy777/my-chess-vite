@@ -4,7 +4,6 @@ import BoardComponent from "@/components/board/Board";
 import { Board } from "@/models/board/Board";
 import { Player } from "@/models/Player";
 import { Colors } from "@/models/Colors";
-import LostFigures from "@/components/ui/LostFigures";
 import Timer from "@/components/ui/Timer";
 import PromotionModal from "@/modals/PromotionModal";
 import { FigureNames } from "@/models/figures/Figure";
@@ -19,6 +18,7 @@ import { useMoveHistory } from "@/hooks/useMoveHistory";
 import { generateFEN } from "@/services/fen";
 import ControlButtons from "@/components/ui/ControlButtons";
 import StartMenu from "@/components/ui/StartMenu";
+import CapturedPanel from "@/components/ui/CapturedPanel";
 
 function App() {
   const [showMenu, setShowMenu] = useState(true);
@@ -74,7 +74,7 @@ function App() {
     setIsGameOver(false);
     setGameOverMessage(null);
     setPromotionCell(null);
-    setCurrentPlayer(whitePlayer); // завжди білі починають
+    setCurrentPlayer(whitePlayer);
   }
 
   function swapPlayer() {
@@ -108,37 +108,56 @@ function App() {
     setBoard(board.getCopyBoard());
   }
 
+  const playerColor = flip ? Colors.BLACK : Colors.WHITE;
+  const opponentColor = flip ? Colors.WHITE : Colors.BLACK;
+
+  const playerLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
+  const opponentLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
+
   return (
     <div className="app">
-      <div className="main-content">
-        <BoardComponent
-          board={board}
-          setBoard={setBoard}
-          currentPlayer={currentPlayer}
-          swapPlayer={swapPlayer}
-          promotionCell={promotionCell}
-          setPromotionCell={setPromotionCell}
-          fenHistory={fenHistory}
-          isGameOver={isGameOver}
-          setIsGameOver={setIsGameOver}
-          setGameOverMessage={setGameOverMessage}
-          selectedCell={selectedCell}
-          setSelectedCell={setSelectedCell}
-          onMoveComplete={handleMoveComplete}
-          flip={flip}
-        />
-        {promotionCell && (
-          <PromotionModal
-            color={promotionCell.figure!.color}
-            onSelect={handlePromotionSelect}
+      <div className="main-content flex flex-col items-center gap-2 py-2">
+        <div className="relative flex flex-col items-center">
+          {/* Opponent's captured figures at top */}
+          <CapturedPanel
+            lostWhiteFigures={opponentColor === Colors.WHITE ? opponentLost : []}
+            lostBlackFigures={opponentColor === Colors.BLACK ? opponentLost : []}
+            flip={false}
           />
-        )}
-        {isGameOver && (
-          <GameOverModal
-            message={gameOverMessage || "Гру завершено"}
-            onRestart={() => restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)}
+
+          {/* Board */}
+          <BoardComponent
+            board={board}
+            setBoard={setBoard}
+            currentPlayer={currentPlayer}
+            swapPlayer={swapPlayer}
+            promotionCell={promotionCell}
+            setPromotionCell={setPromotionCell}
+            fenHistory={fenHistory}
+            isGameOver={isGameOver}
+            setIsGameOver={setIsGameOver}
+            setGameOverMessage={setGameOverMessage}
+            selectedCell={selectedCell}
+            setSelectedCell={setSelectedCell}
+            onMoveComplete={handleMoveComplete}
+            flip={flip}
           />
-        )}
+
+          {/* Player's captured figures at bottom */}
+          <CapturedPanel
+            lostWhiteFigures={playerColor === Colors.WHITE ? playerLost : []}
+            lostBlackFigures={playerColor === Colors.BLACK ? playerLost : []}
+            flip={true}
+          />
+
+          {/* PromotionModal */}
+          {promotionCell && (
+            <PromotionModal
+              color={promotionCell.figure!.color}
+              onSelect={handlePromotionSelect}
+            />
+          )}
+        </div>
       </div>
 
       <div className="sidebar">
@@ -156,18 +175,38 @@ function App() {
           </div>
         ) : (
           <>
+            {/* Game Controls */}
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <button
+                className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                onClick={() => setFlip(!flip)}
+              >
+                🔄 Розвернути
+              </button>
+              <button
+                className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                onClick={() =>
+                  restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
+                }
+              >
+                🔁 Перезапуск
+              </button>
+            </div>
+
             <Timer
-              restart={() => restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)}
+              restart={() =>
+                restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
+              }
               currentPlayer={currentPlayer}
               isGameOver={isGameOver}
               initialTime={initialTime}
             />
-            <LostFigures title="Чорні фігури" figures={board.lostBlackFigures} />
-            <LostFigures title="Білі фігури" figures={board.lostWhiteFigures} />
             <HistoryPanel
               history={moveHistory}
               activeIndex={currentIndex}
               onSelect={handleRestoreByIndex}
+              lostWhiteFigures={board.lostWhiteFigures}
+              lostBlackFigures={board.lostBlackFigures}
             />
             <ControlButtons
               goBack={() => handleRestoreByIndex(currentIndex - 1)}

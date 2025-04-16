@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* 🔁 Скидання margin/padding */
 * {
   margin: 0;
