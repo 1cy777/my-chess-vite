@@ -7,7 +7,7 @@ import { generateFEN, fromFEN } from "@/services/fen";
 import { getNextColor } from "@/services/colorUtils";
 import { Player } from "@/models/Player";
 import { Board, } from "@/models/board/Board";
-import { isCheck, isCheckmate } from "@/models/board/board-logic/boardStatus";
+import { isCheck, isCheckmate, checkForDrawConditions } from "@/models/board/board-logic/boardStatus";
 
 export function useMoveHistory(
   whitePlayer: Player,
@@ -47,8 +47,14 @@ function handleMoveComplete(
 
   const opponentColor = getNextColor(figure.color);
 
-  if (isCheckmate(from.board, opponentColor)) {
+  const drawMessage = checkForDrawConditions(from.board);
+  if (drawMessage) {
+    setIsGameOver(true);
+    setGameOverMessage(drawMessage);
+  } else if (isCheckmate(from.board, opponentColor)) {
     notation += "#";
+    setIsGameOver(true);
+    setGameOverMessage(figure.color === Colors.WHITE ? "Білі виграли (мат)" : "Чорні виграли (мат)");
   } else if (isCheck(from.board, opponentColor)) {
     notation += "+";
   }

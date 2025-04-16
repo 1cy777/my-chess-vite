@@ -16,6 +16,15 @@
   overflow: hidden;
 }
 
+/* новий обгортковий блок для центрування всієї app */
+.app-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  background-color: #1a1a1a;
+}
+
 /* 🧩 Основна частина гри */
 .main-content {
   flex: 1;

@@ -12,13 +12,13 @@ import { Rook } from "@/models/figures/Rook";
 import { Knight } from "@/models/figures/Knight";
 import { Bishop } from "@/models/figures/Bishop";
 import { Queen } from "@/models/figures/Queen";
-import GameOverModal from "@/modals/GameOverModal";
 import HistoryPanel from "@/components/ui/HistoryPanel";
 import { useMoveHistory } from "@/hooks/useMoveHistory";
 import { generateFEN } from "@/services/fen";
 import ControlButtons from "@/components/ui/ControlButtons";
 import StartMenu from "@/components/ui/StartMenu";
 import CapturedPanel from "@/components/ui/CapturedPanel";
+import GameOverModal from "@/modals/GameOverModal";
 
 function App() {
   const [showMenu, setShowMenu] = useState(true);
@@ -77,6 +77,15 @@ function App() {
     setCurrentPlayer(whitePlayer);
   }
 
+  function handleSurrender() {
+    setIsGameOver(true);
+    setGameOverMessage(
+      currentPlayer?.color === Colors.WHITE
+        ? "Білі здались — перемога чорних"
+        : "Чорні здались — перемога білих"
+    );
+  }
+
   function swapPlayer() {
     setCurrentPlayer((prev) =>
       prev?.color === Colors.WHITE ? blackPlayer : whitePlayer
@@ -111,21 +120,19 @@ function App() {
   const playerColor = flip ? Colors.BLACK : Colors.WHITE;
   const opponentColor = flip ? Colors.WHITE : Colors.BLACK;
 
-  const playerLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
-  const opponentLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
+  const playerLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
+  const opponentLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
 
   return (
-    <div className="app">
-      <div className="main-content flex flex-col items-center gap-2 py-2">
-        <div className="relative flex flex-col items-center">
-          {/* Opponent's captured figures at top */}
+    <div className="app-wrapper flex justify-center items-start min-h-screen bg-[#1a1a1a]">
+      <div className="app flex">
+        <div className={`main-content flex flex-col items-center gap-2 py-2 ${flip ? "flex-col-reverse" : ""}`}>
           <CapturedPanel
             lostWhiteFigures={opponentColor === Colors.WHITE ? opponentLost : []}
             lostBlackFigures={opponentColor === Colors.BLACK ? opponentLost : []}
-            flip={false}
+            position="top"
           />
 
-          {/* Board */}
           <BoardComponent
             board={board}
             setBoard={setBoard}
@@ -143,14 +150,12 @@ function App() {
             flip={flip}
           />
 
-          {/* Player's captured figures at bottom */}
           <CapturedPanel
             lostWhiteFigures={playerColor === Colors.WHITE ? playerLost : []}
             lostBlackFigures={playerColor === Colors.BLACK ? playerLost : []}
-            flip={true}
+            position="bottom"
           />
 
-          {/* PromotionModal */}
           {promotionCell && (
             <PromotionModal
               color={promotionCell.figure!.color}
@@ -158,65 +163,73 @@ function App() {
             />
           )}
         </div>
-      </div>
 
-      <div className="sidebar">
-        {showMenu ? (
-          <div className="menu-wrapper">
-            <StartMenu
-              onSelectSide={(color, time) => {
-                setInitialTime(time);
-                setFlip(color === "black");
-                restart(color, time);
-                setShowMenu(false);
-              }}
-              setFlip={setFlip}
-            />
-          </div>
-        ) : (
-          <>
-            {/* Game Controls */}
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <button
-                className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
-                onClick={() => setFlip(!flip)}
-              >
-                🔄 Розвернути
-              </button>
-              <button
-                className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
-                onClick={() =>
+        <div className="sidebar">
+          {showMenu ? (
+            <div className="menu-wrapper">
+              <StartMenu
+                onSelectSide={(color, time) => {
+                  setInitialTime(time);
+                  setFlip(color === "black");
+                  restart(color, time);
+                  setShowMenu(false);
+                }}
+                setFlip={setFlip}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <button
+                  className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                  onClick={() => setFlip(!flip)}
+                >
+                  🔄 Розвернути
+                </button>
+                <button
+                  className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                  onClick={() =>
+                    restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
+                  }
+                >
+                  🔁 Перезапуск
+                </button>
+              </div>
+
+              <Timer
+                restart={() =>
                   restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
                 }
-              >
-                🔁 Перезапуск
-              </button>
-            </div>
-
-            <Timer
-              restart={() =>
-                restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
-              }
-              currentPlayer={currentPlayer}
-              isGameOver={isGameOver}
-              initialTime={initialTime}
-            />
-            <HistoryPanel
-              history={moveHistory}
-              activeIndex={currentIndex}
-              onSelect={handleRestoreByIndex}
-              lostWhiteFigures={board.lostWhiteFigures}
-              lostBlackFigures={board.lostBlackFigures}
-            />
-            <ControlButtons
-              goBack={() => handleRestoreByIndex(currentIndex - 1)}
-              goForward={() => handleRestoreByIndex(currentIndex + 1)}
-              goToCurrent={() => handleRestoreByIndex(fenHistory.length - 1)}
-              surrender={() => setIsGameOver(true)}
-            />
-          </>
-        )}
+                currentPlayer={currentPlayer}
+                isGameOver={isGameOver}
+                initialTime={initialTime}
+              />
+              <HistoryPanel
+                history={moveHistory}
+                activeIndex={currentIndex}
+                onSelect={handleRestoreByIndex}
+                lostWhiteFigures={board.lostWhiteFigures}
+                lostBlackFigures={board.lostBlackFigures}
+              />
+              <ControlButtons
+                goBack={() => handleRestoreByIndex(currentIndex - 1)}
+                goForward={() => handleRestoreByIndex(currentIndex + 1)}
+                goToCurrent={() => handleRestoreByIndex(fenHistory.length - 1)}
+                surrender={handleSurrender}
+              />
+            </>
+          )}
+        </div>
       </div>
+
+      {isGameOver && (
+        <GameOverModal
+          message={gameOverMessage || "Гру завершено"}
+          onRestart={() =>
+            restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
+          }
+        />
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import CapturedFigures from "./CapturedFigures";
 interface CapturedPanelProps {
   lostWhiteFigures: Figure[];
   lostBlackFigures: Figure[];
-  flip?: boolean;
+  position: "top" | "bottom";
 }
 
 const getTotalValue = (figures: Figure[]): number => {
@@ -24,56 +24,29 @@ const getTotalValue = (figures: Figure[]): number => {
 const CapturedPanel: React.FC<CapturedPanelProps> = ({
   lostWhiteFigures,
   lostBlackFigures,
-  flip, // <-- ВАЖЛИВО: додано сюди!
+  position,
 }) => {
-  const whiteValue = getTotalValue(lostBlackFigures); // білі захопили чорних
-  const blackValue = getTotalValue(lostWhiteFigures); // чорні захопили білих
+  const figures = [...lostWhiteFigures, ...lostBlackFigures];
+  const totalValue = getTotalValue(figures);
+
+  const isBottom = position === "bottom";
 
   return (
-    <div className="flex flex-col items-end gap-1 px-2">
-      {flip ? (
-        <>
-          {/* Білі знизу */}
-          <div className="inline-flex items-center gap-1 min-h-[20px]">
-            <CapturedFigures figures={lostWhiteFigures} small />
-            {blackValue > whiteValue && (
-              <span className="text-sm text-gray-300 font-semibold">
-                +{blackValue - whiteValue}
-              </span>
-            )}
-          </div>
-          {/* Чорні зверху */}
-          <div className="inline-flex items-center gap-1 min-h-[20px]">
-            <CapturedFigures figures={lostBlackFigures} small />
-            {whiteValue > blackValue && (
-              <span className="text-sm text-gray-300 font-semibold">
-                +{whiteValue - blackValue}
-              </span>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Чорні зверху */}
-          <div className="inline-flex items-center gap-1 min-h-[20px]">
-            <CapturedFigures figures={lostBlackFigures} small />
-            {whiteValue > blackValue && (
-              <span className="text-sm text-gray-300 font-semibold">
-                +{whiteValue - blackValue}
-              </span>
-            )}
-          </div>
-          {/* Білі знизу */}
-          <div className="inline-flex items-center gap-1 min-h-[20px]">
-            <CapturedFigures figures={lostWhiteFigures} small />
-            {blackValue > whiteValue && (
-              <span className="text-sm text-gray-300 font-semibold">
-                +{blackValue - whiteValue}
-              </span>
-            )}
-          </div>
-        </>
-      )}
+    <div
+      className={`flex flex-col ${
+        isBottom ? "items-start mt-2" : "items-end mb-2"
+      } px-2 min-h-[24px]`}
+    >
+      <div
+        className={`flex items-center gap-1 ${
+          isBottom ? "flex-row-reverse justify-start" : "justify-end"
+        } w-full`}
+      >
+        <CapturedFigures figures={figures} small />
+        {totalValue > 0 && (
+          <span className="text-sm text-gray-300 font-semibold">+{totalValue}</span>
+        )}
+      </div>
     </div>
   );
 };
