@@ -5,19 +5,30 @@ import { Player } from "@/models/Player";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import BoardHeader from "@/components/board/BoardHeader";
 import BoardGrid from "@/components/board/BoardGrid";
+import { Figure } from "@/models/figures/Figure";
+import { FigureNames } from "@/models/figures/Figure";
 
-interface BoardProps {
+export interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
   currentPlayer: Player | null;
   swapPlayer: () => void;
   promotionCell: Cell | null;
-  setPromotionCell: (cell: Cell) => void;
+  setPromotionCell: (cell: Cell | null) => void;
   fenHistory: string[];
-  setFenHistory: (fens: string[]) => void;
   isGameOver: boolean;
   setIsGameOver: (value: boolean) => void;
   setGameOverMessage: (msg: string | null) => void;
+  selectedCell: Cell | null;
+  setSelectedCell: (cell: Cell | null) => void;
+  flip?: boolean;
+  onMoveComplete: (
+    from: Cell,
+    to: Cell,
+    captured: Figure | null,
+    promotion?: FigureNames,
+    movedFigure?: Figure
+  ) => void;
 }
 
 const BoardComponent: FC<BoardProps> = ({
@@ -28,13 +39,19 @@ const BoardComponent: FC<BoardProps> = ({
   promotionCell,
   setPromotionCell,
   fenHistory,
-  setFenHistory,
   isGameOver,
   setIsGameOver,
   setGameOverMessage,
+  selectedCell,
+  setSelectedCell,
+  flip = false,
+  onMoveComplete,
 }) => {
-  const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(flip);
+
+  useEffect(() => {
+    setIsFlipped(flip);
+  }, [flip]);
 
   const { clickCell, updateBoard } = useGameLogic({
     board,
@@ -45,9 +62,9 @@ const BoardComponent: FC<BoardProps> = ({
     setSelectedCell,
     promotionHandler: setPromotionCell,
     fenHistory,
-    setFenHistory,
     setGameOver: setIsGameOver,
     setGameOverMessage,
+    onMoveComplete,
   });
 
   useEffect(() => {
@@ -57,7 +74,11 @@ const BoardComponent: FC<BoardProps> = ({
 
   return (
     <div>
-      <BoardHeader currentPlayer={currentPlayer} isFlipped={isFlipped} toggleFlip={() => setIsFlipped(!isFlipped)} />
+      <BoardHeader
+        currentPlayer={currentPlayer}
+        isFlipped={isFlipped}
+        toggleFlip={() => setIsFlipped(!isFlipped)}
+      />
       <BoardGrid
         cells={board.cells}
         selectedCell={selectedCell}

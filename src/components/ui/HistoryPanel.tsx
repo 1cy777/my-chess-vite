@@ -1,55 +1,72 @@
 import React from "react";
 import { MoveInfo } from "@/models/MoveInfo";
+import { Colors } from "@/models/Colors";
 
 interface Props {
   history: MoveInfo[];
-  onSelect?: (move: MoveInfo, index: number) => void;
-  activeIndex?: number | null;
+  onSelect: (index: number) => void;
+  activeIndex: number;
 }
 
 const HistoryPanel: React.FC<Props> = ({ history, onSelect, activeIndex }) => {
-  // Групуємо ходи в пари: білі / чорні
-  const groupedMoves = [];
-  for (let i = 0; i < history.length; i += 2) {
-    groupedMoves.push({
-      white: history[i],
-      black: history[i + 1],
-      whiteIndex: i,
-      blackIndex: i + 1,
-    });
+  const grouped: {
+    white: MoveInfo | null;
+    black: MoveInfo | null;
+    whiteIndex: number | null;
+    blackIndex: number | null;
+  }[] = [];
+
+  for (let i = 0; i < history.length; ) {
+    const move = history[i];
+    if (move.color === Colors.WHITE) {
+      const white = move;
+      const whiteIndex = i;
+      let black = null;
+      let blackIndex = null;
+
+      if (history[i + 1]?.color === Colors.BLACK) {
+        black = history[i + 1];
+        blackIndex = i + 1;
+        i += 2;
+      } else {
+        i++;
+      }
+
+      grouped.push({ white, black, whiteIndex, blackIndex });
+    } else if (move.color === Colors.BLACK) {
+      const black = move;
+      const blackIndex = i;
+      grouped.push({ white: null, black, whiteIndex: null, blackIndex });
+      i++;
+    }
   }
 
   return (
-    <div className="history-panel p-2 border rounded shadow max-h-96 overflow-y-auto bg-white text-sm w-72">
-      <h2 className="text-lg font-bold mb-2">Історія ходів</h2>
-      <table className="w-full text-left">
+    <div className="history-panel p-3">
+      <h2 className="font-bold">Історія ходів</h2>
+      <table>
         <thead>
-          <tr className="border-b text-gray-700">
-            <th className="pr-2">#</th>
+          <tr>
+            <th>#</th>
             <th>Білі</th>
             <th>Чорні</th>
           </tr>
         </thead>
         <tbody>
-          {groupedMoves.map(({ white, black, whiteIndex, blackIndex }, i) => (
-            <tr
-              key={i}
-              className={
-                activeIndex === whiteIndex || activeIndex === blackIndex
-                  ? "bg-blue-100 font-semibold"
-                  : "hover:bg-gray-100"
-              }
-            >
-              <td className="pr-2">{i + 1}.</td>
+          {/* Старт є логічно, але не виводиться в UI */}
+
+          {grouped.map(({ white, black, whiteIndex, blackIndex }, i) => (
+            <tr key={i + 1}>
+              <td>{i + 1}.</td>
               <td
-                className="cursor-pointer px-1 py-0.5"
-                onClick={() => onSelect?.(white, whiteIndex)}
+                className={`cursor-pointer px-1 py-0.5 ${activeIndex === (whiteIndex ?? -1) ? "bg-blue-100 font-semibold" : ""}`}
+                onClick={() => whiteIndex !== null && onSelect(whiteIndex + 1)}
               >
-                {getFigureSymbol(white.figure)} {white.notation}
+                {white ? `${getFigureSymbol(white.figure)} ${white.notation}` : ""}
               </td>
               <td
-                className="cursor-pointer px-1 py-0.5"
-                onClick={() => black && onSelect?.(black, blackIndex)}
+                className={`cursor-pointer px-1 py-0.5 ${activeIndex === (blackIndex ?? -1) ? "bg-blue-100 font-semibold" : ""}`}
+                onClick={() => blackIndex !== null && onSelect(blackIndex + 1)}
               >
                 {black ? `${getFigureSymbol(black.figure)} ${black.notation}` : ""}
               </td>
@@ -61,7 +78,6 @@ const HistoryPanel: React.FC<Props> = ({ history, onSelect, activeIndex }) => {
   );
 };
 
-// 🔠 Перетворює фігуру у відповідний юнікод-символ
 function getFigureSymbol(name: string): string {
   const map: Record<string, string> = {
     K: "♔",

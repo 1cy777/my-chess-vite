@@ -7,6 +7,7 @@ import { evaluateGameState } from "@/services/evaluateGameState";
 import { getNextColor } from "@/services/colorUtils";
 import { Figure, FigureNames } from "@/models/figures/Figure";
 
+
 interface UseGameLogicParams {
   board: Board;
   setBoard: (b: Board) => void;
@@ -16,7 +17,6 @@ interface UseGameLogicParams {
   setSelectedCell: (cell: Cell | null) => void;
   promotionHandler: (cell: Cell) => void;
   fenHistory: string[];
-  setFenHistory: (fens: string[]) => void;
   setGameOver: (isOver: boolean) => void;
   setGameOverMessage: (msg: string) => void;
 
@@ -24,7 +24,8 @@ interface UseGameLogicParams {
     from: Cell,
     to: Cell,
     captured: Figure | null,
-    promotion?: FigureNames
+    promotion?: FigureNames,
+    movedFigure?: Figure
   ) => void;
 }
 
@@ -37,7 +38,6 @@ export const useGameLogic = ({
   setSelectedCell,
   promotionHandler,
   fenHistory,
-  setFenHistory,
   setGameOver,
   setGameOverMessage,
   onMoveComplete,
@@ -59,14 +59,18 @@ export const useGameLogic = ({
       const from = selectedCell;
       const to = cell;
       const captured = to.figure ?? null;
-
-      onMoveComplete?.(from, to, captured); // 🟢 СПОЧАТКУ виклик
+      const movedFigure: Figure | undefined = from.figure ?? undefined;
+ // ✅ зберігаємо до move
 
       from.moveFigure(to, (promotionTarget: Cell) => {
         promotionHandler(promotionTarget);
       });
 
       updateBoard();
+
+      from.moveFigure(to, promotionHandler);
+      onMoveComplete?.(from, to, captured, undefined, movedFigure);
+
 
 
       if (currentPlayer) {
@@ -98,8 +102,6 @@ export const useGameLogic = ({
         if (result.message) {
           setGameOverMessage(result.message);
         }
-
-        setFenHistory([...fenHistory, nextFEN]);
       }
 
       swapPlayer();

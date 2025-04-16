@@ -1,4 +1,3 @@
-// 📁 src/components/ui/Timer.tsx
 import React, { FC } from 'react';
 import { Player } from '@/models/Player';
 import useTimer from '@/hooks/useTimer';
@@ -7,15 +6,16 @@ interface TimerProps {
   currentPlayer: Player | null;
   isGameOver: boolean;
   restart: () => void;
+  initialTime: number;
 }
 
-const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart }) => {
+const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart, initialTime }) => {
   const {
     whiteTime,
     blackTime,
     resetTimers,
     formatTime
-  } = useTimer(currentPlayer, isGameOver);
+  } = useTimer(currentPlayer, isGameOver, initialTime);
 
   const handleRestart = () => {
     resetTimers();

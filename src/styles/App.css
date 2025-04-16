@@ -7,12 +7,43 @@
 
 /* 🌐 Обгортка додатку */
 .app {
-  width: 100vw;
+  display: flex;
   height: 100vh;
+  background-color: #1a1a1a;
+  color: white;
+  overflow: hidden;
+}
+
+/* 🧩 Основна частина гри */
+.main-content {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 16px;
   position: relative;
+}
+
+/* 🔳 Права панель (меню або інформація) */
+.sidebar {
+  width: 360px;
+  background-color: #2d241e;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* 🪟 Меню поверх (всередині сайдбару) */
+.sidebar .menu-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ♟️ Шахова дошка */
@@ -21,6 +52,7 @@
   height: calc(64px * 8);
   display: flex;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 /* 📦 Клітинка */
@@ -46,10 +78,10 @@
 
 /* ✅ Виділена клітинка */
 .selected {
-  background-color: green !important; /* !important на випадок конфлікту */
+  background-color: green !important;
 }
 
-/* ✅ Доступна клітинка (без фігури) */
+/* ✅ Доступна клітинка */
 .available {
   height: 12px;
   width: 12px;
@@ -59,20 +91,20 @@
 
 /* 🧩 Втрачені фігури */
 .lost {
-  height: calc(50vh - 60px);
-  padding: 30px;
-  margin-left: 50px;
+  max-height: 300px;
+  padding: 20px;
   background-color: lightgray;
+  overflow-y: auto;
 }
 
 /* ✅ Підсвітка шаху */
 .in-check {
-  background-color: rgb(255, 127, 8) !important; /* 🆕 додаємо !important */
+  background-color: rgb(255, 127, 8) !important;
 }
 
 /* ✅ Підсвітка мата */
 .checkmate {
-  background-color: rgb(255, 0, 0) !important; /* 🆕 додаємо !important */
+  background-color: rgb(255, 0, 0) !important;
 }
 
 @keyframes pulse {
@@ -130,8 +162,10 @@
 /* 🪄 Модалка просування пішака */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;

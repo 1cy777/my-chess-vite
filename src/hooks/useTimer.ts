@@ -1,13 +1,10 @@
-// 📁 src/hooks/useTimer.ts
 import { useEffect, useRef, useState } from 'react';
 import { Player } from '@/models/Player';
 import { Colors } from '@/models/Colors';
 
-const INITIAL_TIME = 5; // 5 хвилин
-
-export default function useTimer(currentPlayer: Player | null, isGameOver: boolean) {
-  const [blackTime, setBlackTime] = useState(INITIAL_TIME);
-  const [whiteTime, setWhiteTime] = useState(INITIAL_TIME);
+export default function useTimer(currentPlayer: Player | null, isGameOver: boolean, initialTime: number) {
+  const [blackTime, setBlackTime] = useState(initialTime);
+  const [whiteTime, setWhiteTime] = useState(initialTime);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -21,7 +18,6 @@ export default function useTimer(currentPlayer: Player | null, isGameOver: boole
     return () => clearTimer();
   }, [currentPlayer, isGameOver]);
 
-
   function startTimer(player: Player) {
     clearTimer();
     const callback =
@@ -29,7 +25,6 @@ export default function useTimer(currentPlayer: Player | null, isGameOver: boole
 
     timerRef.current = setInterval(callback, 1000);
   }
-
 
   function clearTimer() {
     if (timerRef.current) {
@@ -48,8 +43,8 @@ export default function useTimer(currentPlayer: Player | null, isGameOver: boole
 
   function resetTimers() {
     clearTimer();
-    setBlackTime(INITIAL_TIME);
-    setWhiteTime(INITIAL_TIME);
+    setBlackTime(initialTime);
+    setWhiteTime(initialTime);
   }
 
   function formatTime(time: number): string {
