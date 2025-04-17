@@ -1,3 +1,4 @@
+// src/components/board/BoardGrid.tsx
 import React from "react";
 import { Cell } from "@/models/board/Cell";
 import CellComponent from "@/components/board/Cell";
@@ -10,7 +11,13 @@ interface BoardGridProps {
   isGameOver: boolean;
 }
 
-const BoardGrid: React.FC<BoardGridProps> = ({ cells, selectedCell, isFlipped, onCellClick }) => {
+const BoardGrid: React.FC<BoardGridProps> = ({
+  cells,
+  selectedCell,
+  isFlipped,
+  onCellClick,
+  isGameOver,
+}) => {
   const orderedRows = isFlipped ? [...cells].reverse() : cells;
   const columnLabels = isFlipped
     ? ["h", "g", "f", "e", "d", "c", "b", "a"]
@@ -27,12 +34,14 @@ const BoardGrid: React.FC<BoardGridProps> = ({ cells, selectedCell, isFlipped, o
 
             {(isFlipped ? [...row].reverse() : row).map((cell) => (
               <CellComponent
-                key={cell.id}
+                key={`${cell.x}-${cell.y}`}
                 cell={cell}
                 selected={
                   selectedCell?.x === cell.x && selectedCell?.y === cell.y
                 }
-                click={(clicked) => onCellClick(clicked)}
+                click={(c) => {
+                  if (!isGameOver) onCellClick(c);
+                }}
               />
             ))}
           </div>

@@ -1,33 +1,58 @@
-import React, { FC } from 'react';
-import { Player } from '@/models/Player';
-import useTimer from '@/hooks/useTimer';
+// src/components/ui/Timer.tsx
+import React, { FC } from "react";
+import { Colors } from "@/models/Colors";
+import { useTimer } from "@/hooks/useTimer";
 
 interface TimerProps {
-  currentPlayer: Player | null;
+  currentColor: Colors;
   isGameOver: boolean;
-  restart: () => void;
-  initialTime: number;
-  restartTrigger: number;
   hasGameStarted: boolean;
+  isBotThinking: boolean;
+  initialTime: number;
+  onTimeout?: (color: Colors) => void;
 }
 
-const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart, initialTime, restartTrigger, hasGameStarted}) => {
+const Timer: FC<TimerProps> = ({
+  currentColor,
+  isGameOver,
+  hasGameStarted,
+  isBotThinking,
+  initialTime,
+  onTimeout,
+}) => {
   const {
     whiteTime,
     blackTime,
-    resetTimers,
-    formatTime
-  } = useTimer(currentPlayer, isGameOver, initialTime, restartTrigger, hasGameStarted);
-
-  const handleRestart = () => {
-    resetTimers();
-    restart();
-  };
+    formatTime,
+  } = useTimer({
+    currentColor,
+    isGameOver,
+    hasGameStarted,
+    isBotThinking,
+    initialTime,
+    onTimeout,
+  });
 
   return (
-    <div className="timer">
-      <div> Чорні: {formatTime(blackTime)}</div>
-      <div> Білі: {formatTime(whiteTime)}</div>
+    <div className="timer text-sm font-mono space-y-1">
+      <div
+        className={`transition-all duration-300 ${
+          currentColor === Colors.BLACK
+            ? "font-bold text-yellow-300"
+            : "text-white opacity-70"
+        }`}
+      >
+        Чорні: {formatTime(blackTime)}
+      </div>
+      <div
+        className={`transition-all duration-300 ${
+          currentColor === Colors.WHITE
+            ? "font-bold text-yellow-300"
+            : "text-white opacity-70"
+        }`}
+      >
+        Білі: {formatTime(whiteTime)}
+      </div>
     </div>
   );
 };

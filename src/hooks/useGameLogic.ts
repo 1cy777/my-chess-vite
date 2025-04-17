@@ -111,7 +111,12 @@ export const useGameLogic = ({
         cell.figure?.color === currentPlayer?.color &&
         board.hasAvailableMoves(cell)
       ) {
-        setSelectedCell(cell);
+        const boardCopy = board.getCopyBoard();             // ✅ клонуємо спочатку
+        const cloneCell = boardCopy.getCell(cell.x, cell.y); // ✅ знаходимо клон клітинки
+        boardCopy.highlightCells(cloneCell);                 // ✅ підсвічуємо вже клон
+        boardCopy.updateKingCheckStatus();                   // ✅ опціонально
+        setSelectedCell(cloneCell);                          // ✅ встановлюємо саме клон
+        setBoard(boardCopy);                                 // ✅ оновлюємо дошку
       } else if (!cell.available) {
         return;
       } else {

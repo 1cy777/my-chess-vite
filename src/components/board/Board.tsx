@@ -1,3 +1,4 @@
+// src/components/board/Board.tsx
 import React, { FC, useEffect, useState } from "react";
 import { Board } from "@/models/board/Board";
 import { Cell } from "@/models/board/Cell";
@@ -52,7 +53,7 @@ const BoardComponent: FC<BoardProps> = ({
     setIsFlipped(flip);
   }, [flip]);
 
-  const { clickCell, updateBoard } = useGameLogic({
+  const { clickCell } = useGameLogic({
     board,
     setBoard,
     currentPlayer,
@@ -66,21 +67,19 @@ const BoardComponent: FC<BoardProps> = ({
     onMoveComplete,
   });
 
+  // Підсвічуємо клітини, не копіюємо дошку
   useEffect(() => {
     board.highlightCells(selectedCell);
-    updateBoard();
-  }, [selectedCell]);
+  }, [board, selectedCell]);
 
   return (
-    <div>
-      <BoardGrid
-        cells={board.cells}
-        selectedCell={selectedCell}
-        isFlipped={isFlipped}
-        isGameOver={isGameOver}
-        onCellClick={(clicked) => clickCell(clicked, isGameOver)}
-      />
-    </div>
+    <BoardGrid
+      cells={board.cells}
+      selectedCell={selectedCell}
+      isFlipped={isFlipped}
+      isGameOver={isGameOver}
+      onCellClick={(cell) => clickCell(cell, isGameOver)}
+    />
   );
 };
 

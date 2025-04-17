@@ -97,4 +97,5 @@ export function moveFigureLogic(
   // --- Генерація FEN після ходу ---
   const nextColor = getNextColor(movingFigure.color);
   console.log(generateFEN(cell.board, nextColor));
+
 }

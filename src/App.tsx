@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// src/App.tsx
+import React, { useState, useEffect, useMemo } from "react";
 import "@/styles/App.css";
 import BoardComponent from "@/components/board/Board";
 import { Board } from "@/models/board/Board";
@@ -21,22 +22,36 @@ import CapturedPanel from "@/components/ui/CapturedPanel";
 import GameOverModal from "@/modals/GameOverModal";
 
 function App() {
+  /* ---------- локальний state ---------- */
   const [showMenu, setShowMenu] = useState(true);
   const [flip, setFlip] = useState(false);
   const [initialTime, setInitialTime] = useState(300);
 
   const [board, setBoard] = useState(new Board());
-  const [whitePlayer] = useState(new Player(Colors.WHITE));
-  const [blackPlayer] = useState(new Player(Colors.BLACK));
+  const whitePlayer = useMemo(() => new Player(Colors.WHITE), []);
+  const blackPlayer = useMemo(() => new Player(Colors.BLACK), []);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+
   const [promotionCell, setPromotionCell] = useState<Cell | null>(null);
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameOverMessage, setGameOverMessage] = useState<string | null>(null);
+
   const [restartTrigger, setRestartTrigger] = useState(0);
   const [hasGameStarted, setHasGameStarted] = useState(false);
-  const [playerColor, setPlayerColor] = useState<Colors>(Colors.WHITE);
 
+  const [playerColor, setPlayerColor] = useState<Colors>(Colors.WHITE); // яким кольором грає користувач
+  const [vsBot, setVsBot] = useState(false);                            // чи увімкнений бот
+
+  /* ---------- допоміжні гетери ---------- */
+  const getCurrentPlayer = () => currentPlayer;
+  const getCurrentBoard = () => board;
+
+  /* ---------- колір, яким грає бот ---------- */
+  const botColor: Colors = playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
+
+  /* ---------- логіка історії ходів + бот ---------- */
   const {
     moveHistory,
     fenHistory,
@@ -46,6 +61,7 @@ function App() {
     resetHistory,
     setFenHistory,
     setCurrentIndex,
+    botThinking,
   } = useMoveHistory(
     whitePlayer,
     blackPlayer,
@@ -54,9 +70,16 @@ function App() {
     setIsGameOver,
     setGameOverMessage,
     setSelectedCell,
-    setHasGameStarted
+    setHasGameStarted,
+    vsBot,
+    botColor,            // <‑‑ передаємо в хук
+    getCurrentPlayer,
+    getCurrentBoard,
+    swapPlayer,
+    isGameOver
   );
 
+  /* ---------- ініціалізація нової дошки при першому рендері ---------- */
   useEffect(() => {
     const newBoard = new Board();
     newBoard.initCells();
@@ -64,7 +87,8 @@ function App() {
     setBoard(newBoard);
   }, []);
 
-  function restart(selectedColor: "white" | "black" = "white", time: number = initialTime) {
+  /* ---------- перезапуск гри ---------- */
+  function restart(selected: "white" | "black" = "white", time: number = initialTime) {
     const newBoard = new Board();
     newBoard.initCells();
     newBoard.addFigures();
@@ -74,17 +98,21 @@ function App() {
     setFenHistory([generateFEN(newBoard, Colors.WHITE)]);
     setCurrentIndex(0);
     setInitialTime(time);
-    setRestartTrigger(prev => prev + 1);
+    setRestartTrigger((v) => v + 1);
     setHasGameStarted(false);
 
     setIsGameOver(false);
     setGameOverMessage(null);
     setPromotionCell(null);
 
-    setCurrentPlayer(whitePlayer); // ✅ білий завжди починає
-    setPlayerColor(selectedColor === "white" ? Colors.WHITE : Colors.BLACK); // 💾 хто ти
+    // 🔥 створюємо нового гравця для правильного оновлення currentPlayer
+    setCurrentPlayer(new Player(Colors.WHITE));
+
+    // фіксуємо, яким кольором грає користувач
+    setPlayerColor(selected === "white" ? Colors.WHITE : Colors.BLACK);
   }
 
+  /* ---------- здатися ---------- */
   function handleSurrender() {
     setIsGameOver(true);
     setGameOverMessage(
@@ -94,12 +122,14 @@ function App() {
     );
   }
 
+  /* ---------- зміна гравця ---------- */
   function swapPlayer() {
     setCurrentPlayer((prev) =>
       prev?.color === Colors.WHITE ? blackPlayer : whitePlayer
     );
   }
 
+  /* ---------- вибір фігури для промоції ---------- */
   function handlePromotionSelect(figureName: FigureNames) {
     if (!promotionCell) return;
     const color = promotionCell.figure?.color;
@@ -125,22 +155,31 @@ function App() {
     setBoard(board.getCopyBoard());
   }
 
+  /* ---------- втрати та кольори ---------- */
   const opponentColor = playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
   const playerLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
   const opponentLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
-  const restartColor: "white" | "black" = currentPlayer?.color === Colors.WHITE ? "white" : "black";
 
+  const restartColor: "white" | "black" =
+    currentPlayer?.color === Colors.WHITE ? "white" : "black";
 
+  /* ---------- рендер ---------- */
   return (
     <div className="app-wrapper flex justify-center items-start min-h-screen bg-[#1a1a1a]">
       <div className="app flex">
-        <div className={`main-content flex flex-col items-center gap-2 py-2 ${flip ? "flex-col-reverse" : ""}`}>
+        {/* ---- головна колонка (дошка + захоплені фігури) ---- */}
+        <div
+          className={`main-content flex flex-col items-center gap-2 py-2 ${flip ? "flex-col-reverse" : ""
+            }`}
+        >
+          {/* захоплені фігури суперника (зверху) */}
           <CapturedPanel
             lostWhiteFigures={opponentColor === Colors.WHITE ? opponentLost : []}
             lostBlackFigures={opponentColor === Colors.BLACK ? opponentLost : []}
             position="top"
           />
 
+          {/* сама дошка */}
           <BoardComponent
             board={board}
             setBoard={setBoard}
@@ -158,12 +197,14 @@ function App() {
             flip={flip}
           />
 
+          {/* захоплені фігури гравця (знизу) */}
           <CapturedPanel
             lostWhiteFigures={playerColor === Colors.WHITE ? playerLost : []}
             lostBlackFigures={playerColor === Colors.BLACK ? playerLost : []}
             position="bottom"
           />
 
+          {/* модалка промоції */}
           {promotionCell && (
             <PromotionModal
               color={promotionCell.figure!.color}
@@ -172,11 +213,14 @@ function App() {
           )}
         </div>
 
+        {/* ---- сайдбар ---- */}
         <div className="sidebar">
           {showMenu ? (
+            /* стартове меню */
             <div className="menu-wrapper">
               <StartMenu
-                onSelectSide={(color, time) => {
+                onSelectSide={(color, time, withBot) => {
+                  setVsBot(withBot);
                   setInitialTime(time);
                   setFlip(color === "black");
                   restart(color, time);
@@ -186,6 +230,7 @@ function App() {
               />
             </div>
           ) : (
+            /* панелі праворуч від дошки */
             <>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <button
@@ -203,13 +248,21 @@ function App() {
               </div>
 
               <Timer
-                currentPlayer={currentPlayer}
+                currentColor={currentPlayer?.color ?? Colors.WHITE}
                 isGameOver={isGameOver}
-                initialTime={initialTime}
-                restart={() => restart(restartColor, initialTime)}
-                restartTrigger={restartTrigger}
                 hasGameStarted={hasGameStarted}
+                isBotThinking={botThinking}
+                initialTime={initialTime}
+                onTimeout={(color) => {
+                  setIsGameOver(true);
+                  setGameOverMessage(
+                    color === Colors.WHITE
+                      ? "У Білих закінчився час — перемога чорних"
+                      : "У Чорних закінчився час — перемога білих"
+                  );
+                }}
               />
+
               <HistoryPanel
                 history={moveHistory}
                 activeIndex={currentIndex}
@@ -217,6 +270,7 @@ function App() {
                 lostWhiteFigures={board.lostWhiteFigures}
                 lostBlackFigures={board.lostBlackFigures}
               />
+
               <ControlButtons
                 goBack={() => handleRestoreByIndex(currentIndex - 1)}
                 goForward={() => handleRestoreByIndex(currentIndex + 1)}
@@ -228,6 +282,7 @@ function App() {
         </div>
       </div>
 
+      {/* модалка завершення гри */}
       {isGameOver && (
         <GameOverModal
           message={gameOverMessage || "Гру завершено"}

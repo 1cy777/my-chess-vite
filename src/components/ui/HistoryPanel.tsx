@@ -11,68 +11,85 @@ interface Props {
   lostBlackFigures: Figure[];
 }
 
+const HistoryPanel: React.FC<Props> = ({
+  history,
+  onSelect,
+  activeIndex,
+}) => {
+  /** групуємо по парах, пропускаючи undefined */
+  const grouped = history.reduce<
+    {
+      white: MoveInfo | null;
+      black: MoveInfo | null;
+      whiteIndex: number | null;
+      blackIndex: number | null;
+    }[]
+  >((acc, move, i) => {
+    if (!move) return acc; // 🛡️  пропускаємо «дірки»
 
-const HistoryPanel: React.FC<Props> = ({ history, onSelect, activeIndex }) => {
-  const grouped: {
-    white: MoveInfo | null;
-    black: MoveInfo | null;
-    whiteIndex: number | null;
-    blackIndex: number | null;
-  }[] = [];
-
-  for (let i = 0; i < history.length; ) {
-    const move = history[i];
+    // якщо білий — створюємо нову пару
     if (move.color === Colors.WHITE) {
-      const white = move;
-      const whiteIndex = i;
-      let black = null;
-      let blackIndex = null;
-
-      if (history[i + 1]?.color === Colors.BLACK) {
-        black = history[i + 1];
-        blackIndex = i + 1;
-        i += 2;
+      acc.push({
+        white: move,
+        black: null,
+        whiteIndex: i,
+        blackIndex: null,
+      });
+    } else {
+      // чорний — дописуємо в останню пару або створюємо нову
+      const last = acc.at(-1);
+      if (last && last.black == null) {
+        last.black = move;
+        last.blackIndex = i;
       } else {
-        i++;
+        acc.push({
+          white: null,
+          black: move,
+          whiteIndex: null,
+          blackIndex: i,
+        });
       }
-
-      grouped.push({ white, black, whiteIndex, blackIndex });
-    } else if (move.color === Colors.BLACK) {
-      const black = move;
-      const blackIndex = i;
-      grouped.push({ white: null, black, whiteIndex: null, blackIndex });
-      i++;
     }
-  }
+    return acc;
+  }, []);
 
   return (
     <div className="history-panel p-3">
-      <h2 className="font-bold">Історія ходів</h2>
-      <table>
+      <h2 className="font-bold mb-1">Історія ходів</h2>
+
+      <table className="text-sm">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Білі</th>
+            <th className="pr-1">#</th>
+            <th className="pr-2">Білі</th>
             <th>Чорні</th>
           </tr>
         </thead>
         <tbody>
-          {/* Старт є логічно, але не виводиться в UI */}
+          {grouped.map(({ white, black, whiteIndex, blackIndex }, idx) => (
+            <tr key={idx}>
+              <td className="pr-1">{idx + 1}.</td>
 
-          {grouped.map(({ white, black, whiteIndex, blackIndex }, i) => (
-            <tr key={i + 1}>
-              <td>{i + 1}.</td>
               <td
-                className={`cursor-pointer px-1 py-0.5 ${activeIndex === (whiteIndex ?? -1) ? "bg-blue-100 font-semibold" : ""}`}
-                onClick={() => whiteIndex !== null && onSelect(whiteIndex + 1)}
+                className={`cursor-pointer px-1 ${
+                  activeIndex === whiteIndex ? "bg-blue-100 font-semibold" : ""
+                }`}
+                onClick={() =>
+                  whiteIndex !== null && onSelect(whiteIndex)
+                }
               >
-                {white ? `${getFigureSymbol(white.figure)} ${white.notation}` : ""}
+                {white && `${fig(white.figure)} ${white.notation}`}
               </td>
+
               <td
-                className={`cursor-pointer px-1 py-0.5 ${activeIndex === (blackIndex ?? -1) ? "bg-blue-100 font-semibold" : ""}`}
-                onClick={() => blackIndex !== null && onSelect(blackIndex + 1)}
+                className={`cursor-pointer px-1 ${
+                  activeIndex === blackIndex ? "bg-blue-100 font-semibold" : ""
+                }`}
+                onClick={() =>
+                  blackIndex !== null && onSelect(blackIndex)
+                }
               >
-                {black ? `${getFigureSymbol(black.figure)} ${black.notation}` : ""}
+                {black && `${fig(black.figure)} ${black.notation}`}
               </td>
             </tr>
           ))}
@@ -82,7 +99,8 @@ const HistoryPanel: React.FC<Props> = ({ history, onSelect, activeIndex }) => {
   );
 };
 
-function getFigureSymbol(name: string): string {
+/** Повертає юнікод‑фігуру для SAN‑символу */
+function fig(name: string): string {
   const map: Record<string, string> = {
     K: "♔",
     Q: "♕",
@@ -91,7 +109,7 @@ function getFigureSymbol(name: string): string {
     N: "♘",
     P: "♙",
   };
-  return map[name] || "";
+  return map[name] ?? "";
 }
 
 export default HistoryPanel;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface StartMenuProps {
-  onSelectSide: (color: "white" | "black", time: number) => void;
+  onSelectSide: (color: "white" | "black", time: number, withBot: boolean) => void;
   setFlip: (value: boolean) => void;
 }
 
@@ -33,7 +33,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ onSelectSide, setFlip }) => {
             <p className="text-pink-400 text-lg mb-1">🤖</p>
             <p className="font-semibold text-lg">Грати з ботом</p>
             <p className="text-sm text-gray-300">
-              Виберіть складність і почніть матч
+              Виберіть сторону та таймер
             </p>
           </button>
         </>
@@ -59,7 +59,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ onSelectSide, setFlip }) => {
             <button
               onClick={() => {
                 setFlip(false);
-                onSelectSide("white", timeLimit);
+                onSelectSide("white", timeLimit, true); // 🧠 withBot = true
               }}
               className="bg-white text-black font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-transform duration-200"
             >
@@ -68,7 +68,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ onSelectSide, setFlip }) => {
             <button
               onClick={() => {
                 setFlip(true);
-                onSelectSide("black", timeLimit);
+                onSelectSide("black", timeLimit, true); // 🧠 withBot = true
               }}
               className="bg-black text-white font-semibold px-6 py-3 rounded-lg hover:scale-105 transition-transform duration-200"
             >

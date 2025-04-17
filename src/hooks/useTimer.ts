@@ -1,76 +1,58 @@
-import { useEffect, useRef, useState } from 'react';
-import { Player } from '@/models/Player';
-import { Colors } from '@/models/Colors';
+// src/hooks/useTimer.ts
+import { useEffect, useState } from "react";
+import { Colors } from "@/models/Colors";
 
-export default function useTimer(
-  currentPlayer: Player | null,
-  isGameOver: boolean,
-  initialTime: number,
-  restartTrigger: number, // ⬅️ новий аргумент
-  hasGameStarted: boolean
-) {
-  const [blackTime, setBlackTime] = useState(initialTime);
+interface UseTimerProps {
+  currentColor: Colors;
+  isGameOver: boolean;
+  hasGameStarted: boolean;
+  isBotThinking: boolean;
+  initialTime: number;
+  onTimeout?: (color: Colors) => void;
+}
+
+export const useTimer = ({
+  currentColor,
+  isGameOver,
+  hasGameStarted,
+  isBotThinking,
+  initialTime,
+  onTimeout,
+}: UseTimerProps) => {
   const [whiteTime, setWhiteTime] = useState(initialTime);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [blackTime, setBlackTime] = useState(initialTime);
 
   useEffect(() => {
-    setBlackTime(initialTime);
-    setWhiteTime(initialTime);
-    clearTimer(); // важливо!
-  }, [restartTrigger]); // ⬅️ реагує лише на restartTrigger
+    if (!hasGameStarted || isGameOver || isBotThinking) return;
 
-  useEffect(() => {
-    if (isGameOver || !currentPlayer || !hasGameStarted) {
-      clearTimer();
-      return;
-    }
-  
-    startTimer(currentPlayer);
-  
-    return () => clearTimer();
-  }, [currentPlayer, isGameOver, hasGameStarted]);
+    const interval = setInterval(() => {
+      if (currentColor === Colors.WHITE) {
+        setWhiteTime((prev) => {
+          const next = Math.max(prev - 1, 0);
+          if (next === 0 && onTimeout) onTimeout(Colors.WHITE);
+          return next;
+        });
+      } else {
+        setBlackTime((prev) => {
+          const next = Math.max(prev - 1, 0);
+          if (next === 0 && onTimeout) onTimeout(Colors.BLACK);
+          return next;
+        });
+      }
+    }, 1000);
 
-  function startTimer(player: Player) {
-    clearTimer();
-    const callback =
-      player.color === Colors.WHITE ? decrementWhite : decrementBlack;
+    return () => clearInterval(interval);
+  }, [currentColor, isGameOver, hasGameStarted, isBotThinking, onTimeout]);
 
-    timerRef.current = setInterval(callback, 1000);
-  }
-
-  function clearTimer() {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-
-  function decrementBlack() {
-    setBlackTime((prev) => Math.max(prev - 1, 0));
-  }
-
-  function decrementWhite() {
-    setWhiteTime((prev) => Math.max(prev - 1, 0));
-  }
-
-  function resetTimers() {
-    clearTimer();
-    setBlackTime(initialTime);
-    setWhiteTime(initialTime);
-  }
-
-  function formatTime(time: number): string {
+  const formatTime = (time: number): string => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`;
-  }
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   return {
     whiteTime,
     blackTime,
-    resetTimers,
     formatTime,
   };
-}
+};
