@@ -1,0 +1,41 @@
+:root {
+  /* font-family: "Bebas Neue", serif; */
+  font-family: "Nunito", serif;
+  scroll-behavior: smooth;
+}
+
+html, body {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+.body__wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex-grow: 1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.big-container {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+img {
+  width: 100%;
+}
+
+body.lock {
+  overflow: hidden;
+}
+

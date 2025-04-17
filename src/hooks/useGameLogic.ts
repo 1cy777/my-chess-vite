@@ -60,7 +60,7 @@ export const useGameLogic = ({
       const to = cell;
       const captured = to.figure ?? null;
       const movedFigure: Figure | undefined = from.figure ?? undefined;
- // ✅ зберігаємо до move
+ // зберігаємо до move
 
       from.moveFigure(to, (promotionTarget: Cell) => {
         promotionHandler(promotionTarget);

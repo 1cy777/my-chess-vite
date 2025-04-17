@@ -33,6 +33,9 @@ function App() {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameOverMessage, setGameOverMessage] = useState<string | null>(null);
+  const [restartTrigger, setRestartTrigger] = useState(0);
+  const [hasGameStarted, setHasGameStarted] = useState(false);
+  const [playerColor, setPlayerColor] = useState<Colors>(Colors.WHITE);
 
   const {
     moveHistory,
@@ -50,7 +53,8 @@ function App() {
     setCurrentPlayer,
     setIsGameOver,
     setGameOverMessage,
-    setSelectedCell
+    setSelectedCell,
+    setHasGameStarted
   );
 
   useEffect(() => {
@@ -60,7 +64,7 @@ function App() {
     setBoard(newBoard);
   }, []);
 
-  function restart(selectedColor: "white" | "black", time: number = initialTime) {
+  function restart(selectedColor: "white" | "black" = "white", time: number = initialTime) {
     const newBoard = new Board();
     newBoard.initCells();
     newBoard.addFigures();
@@ -70,11 +74,15 @@ function App() {
     setFenHistory([generateFEN(newBoard, Colors.WHITE)]);
     setCurrentIndex(0);
     setInitialTime(time);
+    setRestartTrigger(prev => prev + 1);
+    setHasGameStarted(false);
 
     setIsGameOver(false);
     setGameOverMessage(null);
     setPromotionCell(null);
-    setCurrentPlayer(whitePlayer);
+
+    setCurrentPlayer(whitePlayer); // ✅ білий завжди починає
+    setPlayerColor(selectedColor === "white" ? Colors.WHITE : Colors.BLACK); // 💾 хто ти
   }
 
   function handleSurrender() {
@@ -117,11 +125,11 @@ function App() {
     setBoard(board.getCopyBoard());
   }
 
-  const playerColor = flip ? Colors.BLACK : Colors.WHITE;
-  const opponentColor = flip ? Colors.WHITE : Colors.BLACK;
+  const opponentColor = playerColor === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
+  const playerLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
+  const opponentLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
+  const restartColor: "white" | "black" = currentPlayer?.color === Colors.WHITE ? "white" : "black";
 
-  const playerLost = playerColor === Colors.WHITE ? board.lostBlackFigures : board.lostWhiteFigures;
-  const opponentLost = playerColor === Colors.WHITE ? board.lostWhiteFigures : board.lostBlackFigures;
 
   return (
     <div className="app-wrapper flex justify-center items-start min-h-screen bg-[#1a1a1a]">
@@ -188,21 +196,19 @@ function App() {
                 </button>
                 <button
                   className="bg-black/50 hover:bg-black/60 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
-                  onClick={() =>
-                    restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
-                  }
+                  onClick={() => restart(restartColor, initialTime)}
                 >
                   🔁 Перезапуск
                 </button>
               </div>
 
               <Timer
-                restart={() =>
-                  restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
-                }
                 currentPlayer={currentPlayer}
                 isGameOver={isGameOver}
                 initialTime={initialTime}
+                restart={() => restart(restartColor, initialTime)}
+                restartTrigger={restartTrigger}
+                hasGameStarted={hasGameStarted}
               />
               <HistoryPanel
                 history={moveHistory}
@@ -225,9 +231,10 @@ function App() {
       {isGameOver && (
         <GameOverModal
           message={gameOverMessage || "Гру завершено"}
-          onRestart={() =>
-            restart(currentPlayer?.color === Colors.WHITE ? "white" : "black", initialTime)
-          }
+          onRestart={() => {
+            setShowMenu(true);
+            setIsGameOver(false);
+          }}
         />
       )}
     </div>

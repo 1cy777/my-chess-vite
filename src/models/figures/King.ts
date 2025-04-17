@@ -25,14 +25,14 @@ export class King extends Figure {
       const source = this.cell;
       const savedTargetFigure = target.figure;
 
-      // 🧠 Симулюємо хід
+      // Симулюємо хід
       source.figure = null;
       target.figure = this;
       this.cell = target;
 
       const underAttack = target.isUnderAttack(this.color);
 
-      // 🔄 Відкат
+      // Відкат
       target.figure = savedTargetFigure;
       source.figure = this;
       this.cell = source;

@@ -7,15 +7,17 @@ interface TimerProps {
   isGameOver: boolean;
   restart: () => void;
   initialTime: number;
+  restartTrigger: number;
+  hasGameStarted: boolean;
 }
 
-const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart, initialTime }) => {
+const Timer: FC<TimerProps> = ({ currentPlayer, isGameOver, restart, initialTime, restartTrigger, hasGameStarted}) => {
   const {
     whiteTime,
     blackTime,
     resetTimers,
     formatTime
-  } = useTimer(currentPlayer, isGameOver, initialTime);
+  } = useTimer(currentPlayer, isGameOver, initialTime, restartTrigger, hasGameStarted);
 
   const handleRestart = () => {
     resetTimers();
